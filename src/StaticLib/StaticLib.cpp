@@ -48,7 +48,7 @@ static node* generate(int key, const char* value)
 
 	p->key = key;
 	int n = (int)strlen(value);
-	memcpy(p->value, value, strlen(value)+1);
+	memcpy(p->value, value, strlen(value) + 1);
 
 	p->left = p->right = NULL;
 
@@ -70,13 +70,67 @@ bool add(tree* t, int key, const char* value)
 
 	// Todo: t->rootの下にkeyの値の大小でleftかrightを切り替えながらpを追加する処理を実装する
 
-	return true;
+	node* temp = t->root;
+	while (1)
+	{
+		if (key < temp->key)
+		{
+			if (temp->left == NULL)
+			{
+				temp->left = p;
+				return true;
+			}
+			temp = temp->left;
+		}
+
+		else if (key > temp->key)
+		{
+			if (temp->right == NULL)
+			{
+				temp->right = p;
+				return true;
+			}
+			temp = temp->right;
+		}
+
+		else
+		{
+			memcpy(temp->value, value, strlen(value) + 1);
+			free(p);
+			return true;
+		}
+	}
 }
 
 // keyの値を見てノードを検索して、値を取得する
 const char* find(const tree* t, int key)
 {
 	// ToDo: 実装する
+	if (t == NULL || t->root == NULL)
+	{
+		return NULL;
+	}
+
+	node* temp = t->root;
+
+	while (temp != NULL)
+	{
+		if (key == temp->key)
+		{
+			return temp->value;
+		}
+
+		else if (key < temp->key)
+		{
+			temp = temp->left;
+		}
+
+		else
+		{
+			temp = temp->right;
+		}
+
+	}
 	return NULL;
 }
 
@@ -84,4 +138,25 @@ const char* find(const tree* t, int key)
 void search(const tree* t, void (*func)(const node* p))
 {
 	// ToDo: 実装する
+	if (t == NULL || t->root == NULL || func == NULL)
+	{
+		return;
+	}
+
+	node* stack[1024];
+	int top = -1;
+	node* temp = t->root;
+
+	while (temp != NULL || top != -1)
+	{
+		while (temp != NULL)
+		{
+			stack[++top] = temp;
+			temp = temp->left;
+		}
+
+		temp = stack[top--];
+		func(temp);
+		temp = temp->right;
+	}
 }
